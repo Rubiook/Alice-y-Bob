@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Alice y Bob y el patio · Exclusión mutua</title>
+<link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+<main>
+<h1>Alice &amp; Bob y el patio</h1>
+<p class="mut">Exclusión mutua paso a paso · Sistemas Operativos</p>
+<p class="mut">Ejecutá una línea de Alice o de Bob por vez y buscá la secuencia que rompe el algoritmo.</p>
+<div class="pestanas"><button id="t1" class="on">Simulador</button><button id="t2">Entrelazados</button></div>
+<section id="vista-sim">
+<div id="nav"></div>
+<h2 id="tt"></h2><p id="ds" class="mut"></p>
+<div class="arriba">
+<div class="card"><div id="sc"></div><div id="vr"></div></div>
+<div class="lado card">
+<div id="st"></div>
+<div class="ctl">
+<button class="p a" id="ba">Avanza Alice</button>
+<button class="p b" id="bb">Avanza Bob</button>
+<button id="bz">Al azar</button>
+<button id="bu">Deshacer</button>
+<button id="br">Reiniciar</button>
+</div>
+<details id="dt" class="card"><summary>Ver veredicto del algoritmo</summary><p id="vd"></p></details>
+</div>
+</div>
+<div class="cols" id="cols"></div>
+<p class="mut" id="lg"></p>
+</section>
+<section id="vista-ent" hidden>
+<h2>Entrelazados</h2>
+<p>Cada nodo es un estado posible. Los números están sobre las líneas de código: a la izquierda de una línea (o arriba, en Bob) todavía no se ejecutó; del otro lado ya se ejecutó. Alice avanza hacia la derecha y Bob hacia abajo. Cada nodo muestra A/B = a quién favorece el cartel y V/F = bandera levantada o no (primero Alice, después Bob). Tocá un nodo y usá los botones de la barra de abajo para avanzar como Alice (→), como Bob (↓) o los dos a la vez.</p>
+<div class="ajustes">
+<label class="campo"><span>Algoritmo</span><select id="en-alg"></select></label>
+<label class="interruptor"><input type="checkbox" id="en-bucle"><span class="pista"><i></i></span><span>con <code>while (true)</code></span></label>
+</div>
+<div class="card" id="en-info"></div>
+<div class="card en-scroll"><div id="en-caja"><div id="en-grid"></div></div></div>
+<div class="card" id="en-concl"></div>
+<div class="leyenda card">
+<h3>Cómo leer los colores</h3>
+<ul>
+<li><span class="ico">🔴</span><div><b>Nodo rojo</b><br>Los dos perros en el patio: se rompe la exclusión mutua.</div></li>
+<li><span class="ico">🟠</span><div><b>Nodo naranja</b><br>Deadlock: nadie puede avanzar desde ese estado.</div></li>
+<li><span class="raya"></span><div><b>Cuatro casillas rayadas</b><br>Zona de la sección crítica. Si el algoritmo funciona, ahí no cae ningún nodo.</div></li>
+<li><span class="ico">🟥</span><div><b>Línea roja gruesa</b><br>La instrucción de la sección crítica (pasearPerro).</div></li>
+</ul>
+</div>
+<div class="cols" id="en-codigo"></div>
+<div id="en-barra" role="toolbar" aria-label="Controles del entrelazado">
+<div class="en-sel">Nodo elegido: <b id="en-sel">—</b></div>
+<div class="en-fila">
+<button id="en-ba" class="avanza a"></button>
+<button id="en-bb" class="avanza b"></button>
+<button id="en-ambos" class="aux">Avanzar ambos</button>
+<button id="en-todo" class="aux">Mostrar todo</button>
+<button id="en-reset" class="aux">Reiniciar</button>
+</div>
+</div>
+</section>
+<footer>Basado en el teórico de Sistemas Operativos del Ing. Angel Caffa: <a href="https://teoriasistemasoperativos.blogspot.com/p/3-sistemas-operativos-concurrencia-y.html" target="_blank" rel="noopener">Concurrencia y sincronización de procesos</a>. Herramienta didáctica para estudiantes de Sistemas Operativos, Tecnólogo en Informática, UTEC Maldonado.</footer>
+</main>
+<script src="js/algoritmos.js"></script>
+<script src="js/app.js"></script>
+<script src="js/entrelazados.js"></script>
+</body>
+</html>

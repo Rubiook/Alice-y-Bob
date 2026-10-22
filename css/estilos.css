@@ -1,0 +1,197 @@
+:root{--bg:#faf7f2;--fg:#2a2622;--mut:var(--fg);--card:#fff;--bd:#e3dcd0;--patio:#d8ecc4;--al:#d9485f;--bo:#2f6fdb;--ok:#2b8a3e;--bad:#e03131;--warn:#c76a00;--hl:#fff3bf;--sc:#fde8ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#16181d;--fg:#ffffff;--mut:var(--fg);--card:#1f2229;--bd:#333843;--patio:#2d4a2a;--al:#ff7b8f;--bo:#74a7ff;--ok:#69db7c;--bad:#ff6b6b;--warn:#ffa94d;--hl:#4a4320;--sc:#3d2428}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#16181d;--fg:#ffffff;--mut:var(--fg);--card:#1f2229;--bd:#333843;--patio:#2d4a2a;--al:#ff7b8f;--bo:#74a7ff;--ok:#69db7c;--bad:#ff6b6b;--warn:#ffa94d;--hl:#4a4320;--sc:#3d2428}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:18px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{margin:0 auto;padding:16px 24px}
+h1{font-size:1.7rem;margin:.2em 0}h2{font-size:1.3rem;margin:.6em 0 .2em}
+.mut{color:var(--mut);margin:.2em 0}
+#nav{display:flex;gap:6px;overflow-x:auto;padding:8px 0}
+button{font:inherit;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:10px;padding:8px 12px;cursor:pointer}
+#nav button{white-space:nowrap;flex:none}
+button.on{background:var(--fg);color:var(--bg)}
+button:disabled{opacity:.4}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:10px;margin:10px 0}
+svg{width:100%;height:auto;display:block}
+.chip{display:inline-block;border:1px solid var(--bd);border-radius:999px;padding:2px 10px;margin:2px;font:16px ui-monospace,Menlo,Consolas,monospace}
+.chip.on b{color:var(--ok)}
+#st{border-radius:10px;padding:8px 12px;font-weight:600;border:2px solid}
+#st.ok{border-color:var(--ok);color:var(--ok)}#st.bad{border-color:var(--bad);color:var(--bad)}#st.warn{border-color:var(--warn);color:var(--warn)}
+.ctl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.ctl .p{flex:1;min-width:130px;color:#fff;border:0;font-weight:700}
+.ctl .a{background:#d9485f}.ctl .b{background:#2f6fdb}
+.arriba{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);gap:16px;align-items:start}
+.lado .ctl{margin-top:12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.col{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:6px;overflow-x:auto}
+.hd{font-weight:700;padding:2px 4px}
+.ln{display:flex;gap:6px;font:16px/1.7 ui-monospace,Menlo,Consolas,monospace;white-space:pre;padding:0 4px;border-radius:6px}
+.ln b{width:2.2em;color:var(--mut);font-weight:400;text-align:right;flex:none}
+.ln.sc{background:var(--sc)}.ln.cur{background:var(--hl);outline:2px solid var(--fg)}
+.ln.spin::after{content:" ↻ espera";color:var(--warn)}
+footer{font-size:.85rem;color:var(--mut);margin:18px 0 8px}
+a{color:var(--bo)}
+@media(max-width:900px){.arriba{grid-template-columns:1fr}.cols{grid-template-columns:1fr}.card svg{max-width:340px;margin:0 auto}}
+@media(max-width:640px){main{padding:12px}.ln{font-size:15px}.chip{font-size:15px}}
+.movil main{padding-bottom:96px}
+.movil .ctl{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));background:var(--bg);border-top:1px solid var(--bd);z-index:5}
+.movil button{padding:12px 14px}
+
+@media(min-width:901px){.arriba{align-items:stretch}.lado{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}.lado details.card{border:0;padding:0;margin:12px 0 0}}
+
+/* ---- Pestañas y entrelazados ---- */
+[hidden]{display:none!important}
+.pestanas,.barra{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+select{font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px}
+.en-scroll{overflow:auto}
+#en-grid{position:relative;display:grid;gap:10px;width:max-content}
+#en-svg{position:absolute;left:0;top:0;pointer-events:none;z-index:0}
+.cab{font:700 16px ui-monospace,Menlo,Consolas,monospace;text-align:center;align-self:center}
+.celda{min-width:86px;min-height:56px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center;border:1px dashed var(--bd);border-radius:8px;padding:6px}
+.celda.prohibida{background:repeating-linear-gradient(45deg,var(--sc),var(--sc) 6px,transparent 6px,transparent 12px)}
+.nodo{position:relative;z-index:1;font:15px ui-monospace,Menlo,Consolas,monospace;padding:4px 8px;border:2px dashed var(--fg);background:var(--bg)}
+.nodo.hecho{border-style:solid;background:var(--card)}
+.nodo.mala{background:#e03131;border-color:#e03131;color:#fff}
+.nodo.deadlock{background:#e8890c;border-color:#e8890c;color:#000}
+.nodo.ruta{box-shadow:0 0 0 3px var(--hl)}
+.nodo.sel{outline:3px solid var(--fg);outline-offset:2px}
+.mal{color:var(--bad);font-weight:600}.dead{color:var(--warn);font-weight:600}.bien{color:var(--ok);font-weight:600}
+code{font:15px ui-monospace,Menlo,Consolas,monospace}
+
+/* ---- Centrado y cuadrícula de entrelazados ---- */
+body{text-align:center}
+.col,.ln{text-align:left}
+.pestanas,.barra,.ctl,#nav{justify-content:safe center}
+.cab.sc{background:var(--bad);color:#fff!important;border-radius:999px;padding:0 10px}
+.cab{justify-self:center;position:relative;z-index:1}
+.celda{border:0;min-width:96px;min-height:96px;background:none}
+
+/* ---- Huecos entre líneas ---- */
+#en-grid{gap:0}
+.franja-h{height:44px;min-width:110px}
+.franja-v{width:60px}
+
+/* ---- Centrado y margen para flechas de retorno ---- */
+#en-grid{margin:0 auto;padding:0 48px 48px 0}
+#en-svg{overflow:visible}
+.celda{min-width:130px}
+
+/* ---- Más espacio, retornos y leyenda ---- */
+#en-grid.bucle{padding:0 110px 110px 0}
+.leyenda h3{margin:0 0 12px;font-size:1.1rem}
+.leyenda ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.leyenda li{display:flex;gap:12px;align-items:center;text-align:left;border:1px solid var(--bd);border-radius:12px;padding:10px 12px}
+.ico,.raya{flex:none;width:38px;height:38px;display:grid;place-items:center;font-size:28px;line-height:1}
+.raya{border:2px dashed #e03131;border-radius:8px;background:repeating-linear-gradient(45deg,rgba(224,49,49,.55) 0 4px,transparent 4px 8px)}
+
+/* ---- Casillas y nodos más grandes ---- */
+#en-grid{padding:0 60px 60px 0}
+#en-grid.bucle{padding:0 130px 130px 0}
+
+/* ---- Casillas ajustadas al nodo (con lugar para las flechas de retorno) y nodos más grandes ---- */
+#en-caja{margin:0 auto}
+#en-grid{margin:0;padding:0 60px 60px 0;transform-origin:0 0}
+.franja-h{min-width:0}
+
+/* ---- Animaciones del simulador ---- */
+.tela{transition:transform .6s cubic-bezier(.3,0,.2,1)}
+.onda,.cola,.brazoI,.brazoD,.cuerpoP,.rebote,.patat,.charco{transform-box:fill-box}
+.onda{transform-origin:0 50%}
+.tela.arriba .onda{animation:onda 1.2s ease-in-out infinite}
+@keyframes onda{0%,100%{transform:skewY(0)}50%{transform:skewY(7deg)}}
+.cola{transform-origin:100% 100%;animation:cola 1.4s ease-in-out infinite}
+@keyframes cola{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(10deg)}}
+.cuerpoP{transform-origin:50% 100%}
+.persona.esperando .cuerpoP{animation:impaciente 1s ease-in-out infinite}
+@keyframes impaciente{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes latido{50%{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---- Animaciones v2: muerte, explosión, deadlock, pis, bailes ---- */
+.brazoI,.brazoD{transform-origin:50% 5%}
+.perro{transition:transform .8s cubic-bezier(.4,0,.2,1),filter .4s .45s}
+.rebote{transform-origin:center;transition:transform .4s .45s}
+.paseando .rebote{animation:rebote .4s ease-in-out 2}
+@keyframes rebote{50%{transform:translateY(-6px)}}
+/* velocidad de la cola: rápida antes de salir, lenta cuando volvió y el dueño hace otras tareas */
+.perro.ansioso .cola{animation-duration:.22s}
+.perro.relajado .cola{animation-duration:2.4s}
+.perro.paseando .cola{animation-duration:.3s}
+/* pis: levanta la pata trasera, sale el chorro y crece el charco */
+.patat{transform-origin:50% 0;transition:transform .3s}
+.paseando .patat{transform:rotate(70deg);transition-delay:.8s}
+.chorro{opacity:0}
+.paseando .chorro{animation:fluir .4s linear infinite,mostrar 0s .95s forwards}
+@keyframes fluir{to{stroke-dashoffset:-10}}
+@keyframes mostrar{to{opacity:1}}
+.charco{transform-origin:center;transform:scaleX(0)}
+.paseando .charco{animation:charco 2.5s 1s ease-out forwards}
+@keyframes charco{to{transform:scaleX(1)}}
+/* muerte: gris, patas para arriba y ojos en X */
+.xojo{opacity:0}
+.perro.muerto{filter:grayscale(1)}
+.perro.muerto .rebote{animation:none;transform:translateY(8px) rotate(180deg)}
+.perro.muerto .cola{animation:none}
+.perro.muerto .pis{display:none}
+.perro.muerto .xojo{opacity:1}
+.perro.muerto .ojos{opacity:0}
+/* explosión */
+#explosion{opacity:0;pointer-events:none}
+#explosion.visible{opacity:1}
+#explosion .estallido{transform-box:fill-box;transform-origin:center;transform:scale(0)}
+#explosion.visible .estallido{animation:boom .9s ease-out forwards}
+@keyframes boom{0%{transform:scale(0);opacity:1}55%{transform:scale(1.5);opacity:1}100%{transform:scale(2.1);opacity:0}}
+#explosion .chispa{opacity:0}
+#explosion.visible .chispa{animation:chispa .9s ease-out forwards}
+@keyframes chispa{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}
+#choque{opacity:0;transition:opacity .2s .5s;transform-box:fill-box;transform-origin:center}
+#choque.visible{opacity:1;animation:latido .5s ease-in-out .5s infinite}
+@keyframes latido{50%{transform:scale(1.15)}}
+/* deadlock: candado que tiembla */
+#deadlock{opacity:0;transition:opacity .3s;pointer-events:none}
+#deadlock.visible{opacity:1}
+#deadlock .candado{transform-box:fill-box;transform-origin:50% 100%}
+#deadlock.visible .candado{animation:tiembla 1s ease-in-out infinite}
+@keyframes tiembla{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-7deg)}80%{transform:rotate(7deg)}90%{transform:rotate(-4deg)}}
+/* otras tareas: Alice hace el Floss, Bob un baile de brazos alternados con saltitos (estilo Default Dance) */
+.persona.a.ocupado .cuerpoP{animation:caderas .5s ease-in-out infinite}
+.persona.a.ocupado .brazoI,.persona.a.ocupado .brazoD{animation:floss .5s ease-in-out infinite}
+@keyframes floss{0%,100%{transform:rotate(55deg)}50%{transform:rotate(-55deg)}}
+@keyframes caderas{0%,100%{transform:translateX(5px)}50%{transform:translateX(-5px)}}
+.persona.b.ocupado .cuerpoP{animation:saltito .3s ease-in-out infinite}
+.persona.b.ocupado .brazoI{animation:bombeoI .6s ease-in-out infinite}
+.persona.b.ocupado .brazoD{animation:bombeoD .6s ease-in-out infinite}
+@keyframes saltito{50%{transform:translateY(-5px) rotate(3deg)}}
+@keyframes bombeoI{0%,100%{transform:rotate(170deg)}50%{transform:rotate(20deg)}}
+@keyframes bombeoD{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(-170deg)}}
+
+/* ---- Tamaños de casillas y nodos: vienen de CONFIG_ENT (js/entrelazados.js) ---- */
+.celda{min-width:var(--n-ancho,80px);min-height:var(--n-alto,42px);padding:var(--c-arriba,46px) var(--c-derecha,10px) var(--c-abajo,8px) var(--c-izquierda,46px)}
+.nodo{font-size:var(--n-fuente,16px);padding:var(--n-relleno,8px 12px);min-width:var(--n-ancho,80px);min-height:var(--n-alto,42px)}
+
+/* ---- Nodos apilados en la misma casilla (uno arriba del otro) ---- */
+.celda{flex-direction:column;flex-wrap:nowrap;gap:var(--c-gap,16px)}
+
+/* ---- Ajustes de arriba: algoritmo e interruptor del while ---- */
+.ajustes{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 18px;margin:10px 0}
+.campo{display:flex;align-items:center;gap:10px;font-weight:600}
+.ajustes select{min-width:240px;max-width:100%;border:2px solid var(--bd);font-weight:600}
+.interruptor{display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;user-select:none}
+.interruptor input{position:absolute;opacity:0;width:0;height:0}
+.pista{flex:none;width:52px;height:28px;border-radius:999px;background:#8a8f98;position:relative;transition:background .2s}
+.pista i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.45);transition:transform .2s}
+.interruptor input:checked + .pista{background:#2f9e44}
+.interruptor input:checked + .pista i{transform:translateX(24px)}
+.interruptor input:focus-visible + .pista{outline:3px solid var(--bo);outline-offset:2px}
+
+/* ---- Barra fija de controles del entrelazado ---- */
+#en-barra{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:2px solid var(--bd);box-shadow:0 -6px 20px rgba(0,0,0,.25);padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px))}
+.en-sel{font-size:.9rem;margin-bottom:6px}
+.en-fila{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:1200px;margin:0 auto}
+.en-fila button{padding:8px 14px;line-height:1.25}
+.en-fila .avanza{flex:1 1 250px;max-width:400px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;border:0;font-weight:700}
+.en-fila .avanza.a{background:#d9485f}.en-fila .avanza.b{background:#2f6fdb}
+.en-fila .avanza small{font:12px ui-monospace,Menlo,Consolas,monospace;font-weight:400;white-space:normal}
+.en-fila .avanza code{font:inherit}
+@media(max-width:560px){#en-barra{padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px))}.en-sel{margin-bottom:4px}.en-fila{gap:6px}.en-fila .avanza{flex:1 1 44%;padding:6px 8px;font-size:14px}.en-fila .avanza small{font-size:11px}.en-fila .aux{flex:1 1 28%;padding:9px 4px;font-size:14px}}
+@media(max-width:560px){.ajustes{padding:10px 12px}.campo{flex-direction:column;align-items:stretch;gap:4px;width:100%;text-align:center}.ajustes select{min-width:0;width:100%}}
