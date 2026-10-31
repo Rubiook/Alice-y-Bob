@@ -6,7 +6,7 @@ Herramienta interactiva para aprender exclusión mutua en Sistemas Operativos: C
 
 **https://rubiook.github.io/Alice-y-Bob/**
 
-Se publica automáticamente con GitHub Pages (workflow `.github/workflows/pages.yml`) cada vez que se sube un cambio a `main`.
+Se publica con GitHub Pages desde la rama `main` (raíz del repositorio): cada `git push` a `main` regenera el sitio en un minuto, aproximadamente.
 
 ## Qué hace
 
