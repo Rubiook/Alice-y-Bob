@@ -544,6 +544,11 @@ select:hover{border-color:var(--bo)}
   .campo select{flex:1}
 }
 
+/* Pantallas angostas: el aviso "espera" no entra junto al código, así que queda solo el símbolo */
+@media (max-width:520px){
+  .ln.spin::after{content:" ↻";white-space:nowrap}
+}
+
 /* Celulares angostos (360 px y similares): la cabecera tiene que entrar en una sola línea */
 @media (max-width:380px){
   h1{font-size:.86rem;white-space:nowrap}
@@ -557,7 +562,6 @@ select:hover{border-color:var(--bo)}
   .alg-txt b{font-size:.65rem}
   .alg-txt small{font-size:.48rem}
   .en-fila .aux{flex:1 1 30%}
-  .ln.spin::after{content:" ↻";white-space:nowrap}
 }
 
 /* Celulares muy angostos (320 px): sin el texto de marca, la cabecera entra igual */
