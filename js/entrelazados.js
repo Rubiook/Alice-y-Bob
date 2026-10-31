@@ -19,12 +19,12 @@ const ALGORITMOS_ENT = [0, 1, 2, 4, 5];   // índices de ALGORITMOS que sí se p
 // ============================================================
 const CONFIG_ENT = {
   // Tamaño de los nodos (los cuadraditos con A·VF, B·FF...)
-  nodo: { fuente: 16, anchoMin: 80, altoMin: 42, relleno: '8px 12px' },
+  nodo: { fuente: 14.5, anchoMin: 62, altoMin: 28, relleno: '3px 7px' },
 
   // Casilla = nodo CENTRADO + espacio libre a cada lado (por ahí pasan las flechas de retorno).
   // Conviene que arriba = abajo e izquierda = derecha para que el nodo quede en el medio.
   // Toda casilla tiene como MÍNIMO el tamaño de un nodo más este espacio; si hay más nodos, crece.
-  celda: { arriba: 56, izquierda: 52, derecha: 52, abajo: 56, separacion: 16 },   // separacion = hueco entre dos nodos apilados en la misma casilla
+  celda: { arriba: 34, izquierda: 34, derecha: 22, abajo: 34, separacion: 10 },   // separacion = hueco entre dos nodos apilados en la misma casilla
 
   flechas: {
     grosor: 3,          // grosor normal
@@ -70,8 +70,8 @@ const CONFIG_ENT = {
   // Líneas de la cuadrícula
   cuadricula: { grosor: 1.5, grosorCritica: 4, opacidad: 0.35, fundido: 60 },   // fundido = largo del degradé final
 
-  // Escala automática: se achica para entrar en pantalla, pero nunca por debajo de estos mínimos
-  escala: { minimoPC: 0.5, minimoMovil: 0.7 },
+  // Escala automática: se calcula sola para que TODO el mapa entre en la ventana (ancho y alto).
+  escala: { margen: 22 },
 };
 
 // Pasa los tamaños de CONFIG_ENT al CSS (variables que usan .nodo y .celda).
@@ -91,6 +91,7 @@ const ent = {
   mapa: new Map(), // clave del estado -> nodo (para no repetir estados)
   aristas: [],     // {de, a, p}: del nodo "de" al nodo "a" avanzando el proceso p
   sel: 0,          // id del nodo seleccionado
+  procCodigo: 0,   // proceso cuyo código se muestra en el panel lateral (0 = Alice, 1 = Bob)
 };
 
 const lineasEnt = () => ALGORITMOS[ent.alg].lineas.filter(l => l.ejecutable);
@@ -178,6 +179,7 @@ function dibujarGrilla() {
     }
   }
   const g = porId('en-grid');
+  g.classList.toggle('bucle', ent.bucle);
   g.style.gridTemplateColumns = `auto repeat(${cols}, auto)`;
   g.innerHTML = h;
   dibujarCapas(g, ruta, n);
@@ -325,7 +327,7 @@ function dibujarInfo() {
   porId('en-info').innerHTML = h;
 }
 
-// Barra fija de abajo: botones para avanzar desde el nodo elegido, con la línea que se va a ejecutar.
+// Barra de controles: botones para avanzar desde el nodo elegido, con la línea que se va a ejecutar.
 function dibujarControles() {
   const nd = ent.nodos[ent.sel], L = lineasEnt();
   const boton = (id, p, flecha) => {
@@ -347,11 +349,7 @@ function dibujarControles() {
   // los botones individuales quedan apagados porque ya no queda nada por avanzar desde ese nodo.
   porId('en-ambos').disabled = nd.terminal || ![0, 1].some(p => !terminoEnt(nd.est, p) && nd.mov[p] === null);
   porId('en-sel').textContent = etiquetaNodo(nd.est);
-  reservarEspacioBarra();
 }
-// Deja lugar abajo para que la barra fija no tape el contenido.
-function reservarEspacioBarra() { porId('vista-ent').style.paddingBottom = (porId('en-barra').offsetHeight + 16) + 'px'; }
-window.addEventListener('resize', reservarEspacioBarra);
 
 function dibujarConclusiones() {
   const pend = ent.nodos.filter(pendiente).length, L = lineasEnt();
@@ -369,31 +367,42 @@ function dibujarConclusiones() {
   porId('en-concl').innerHTML = h;
 }
 
+// Código del proceso elegido (Alice o Bob), para que entre completo en el panel lateral.
 function dibujarCodigoEnt() {
-  porId('en-codigo').innerHTML = [0, 1].map(p => {
-    let n = 0, h = `<div class="hd" style="color:${p ? 'var(--bo)' : 'var(--al)'}">${NOMBRES[p]}</div>`;
-    for (const l of ALGORITMOS[ent.alg].lineas) {
-      const num = l.ejecutable ? (++n) + (p ? '′' : '') : '';
-      h += `<div class="ln${l.esSeccionCritica ? ' sc' : ''}"><b>${num}</b>${('  '.repeat(l.sangria) + escribirTexto(l.texto, p)).replace(/&/g, '&amp;')}</div>`;
-    }
-    return `<div class="col">${h}</div>`;
-  }).join('');
+  const p = ent.procCodigo || 0;
+  let n = 0;
+  let h = `<div class="hd" style="color:${p ? 'var(--bo)' : 'var(--al)'}">${NOMBRES[p]}</div>
+    <div class="ln"><b></b>while (true) {</div>`;
+  for (const l of ALGORITMOS[ent.alg].lineas) {
+    const num = l.ejecutable ? (++n) + (p ? '′' : '') : '';
+    h += `<div class="ln${l.esSeccionCritica ? ' sc' : ''}"><b>${num}</b>${('  '.repeat(l.sangria) + escribirTexto(l.texto, p)).replace(/&/g, '&amp;')}</div>`;
+  }
+  h += '<div class="ln"><b></b>}</div>';
+  porId('en-codigo').innerHTML = `<div class="col">${h}</div>`;
+  document.querySelectorAll('.code-tabs button').forEach(b => b.classList.toggle('on', +b.dataset.proc === p));
 }
 
-// Ajusta el tamaño del entrelazado al ancho disponible, sin achicarlo demasiado
-// (en celulares nunca baja de 70%; si no entra, se desplaza con scroll).
+// Ajusta el mapa para que entre COMPLETO en el lienzo: mide ancho y alto reales y aplica
+// la escala menor. Nunca hay scroll: si sobra lugar se centra, si falta se achica.
 function ajustarEscala() {
-  const g = porId('en-grid'), caja = porId('en-caja'), disponible = caja.parentElement.clientWidth - 22;
-  if (disponible <= 0) return;   // la pestaña está oculta
-  const minimo = document.documentElement.classList.contains('movil') ? CONFIG_ENT.escala.minimoMovil : CONFIG_ENT.escala.minimoPC;
-  const e = Math.max(minimo, Math.min(1, disponible / g.offsetWidth));
+  const g = porId('en-grid'), caja = porId('en-caja'), lienzo = porId('en-lienzo');
+  if (!g || !lienzo || porId('vista-ent').hidden) return;
+  const disponibleW = lienzo.clientWidth - CONFIG_ENT.escala.margen;
+  const disponibleH = lienzo.clientHeight - CONFIG_ENT.escala.margen;
+  if (disponibleW <= 0 || disponibleH <= 0) return;   // la pestaña está oculta
+  g.style.transform = 'none';
+  const ancho = g.offsetWidth, alto = g.offsetHeight;
+  if (!ancho || !alto) return;
+  const e = Math.min(1.35, disponibleW / ancho, disponibleH / alto);   // 1.35 = se agranda un poco en pantallas grandes, sin deformar
   g.style.transform = `scale(${e})`;
-  caja.style.width = g.offsetWidth * e + 'px';
-  caja.style.height = g.offsetHeight * e + 'px';
+  caja.style.width = ancho * e + 'px';
+  caja.style.height = alto * e + 'px';
 }
-window.addEventListener('resize', ajustarEscala);
 
-function dibujarEnt() { dibujarGrilla(); dibujarInfo(); dibujarControles(); dibujarConclusiones(); }
+function dibujarEnt() {
+  dibujarGrilla(); dibujarInfo(); dibujarControles(); dibujarConclusiones();
+  requestAnimationFrame(ajustarEscala);   // el alto del mapa pudo haber cambiado
+}
 
 function reiniciarEnt() {
   ent.alg = +porId('en-alg').value; ent.bucle = porId('en-bucle').checked;
@@ -406,6 +415,21 @@ function aplicarMovimiento(nd, p) {
   mover(nd, p);
   if (typeof nd.mov[p] === 'number') ent.sel = nd.mov[p];
   }
+
+// ---------- Paneles laterales (Estado / Código / Ayuda) ----------
+function mostrarPanel(nombre) {
+  document.querySelectorAll('.lado-pestanas [data-panel]').forEach(b => {
+    const activo = b.dataset.panel === nombre;
+    b.classList.toggle('on', activo);
+    b.setAttribute('aria-selected', activo);
+  });
+  document.querySelectorAll('.lado-panel').forEach(p => p.classList.toggle('on', p.dataset.panel === nombre));
+  if (nombre === 'codigo') dibujarCodigoEnt();
+}
+function abrirPanelLateral(abierto) {
+  porId('ent-lado').classList.toggle('abierto', abierto);
+  porId('en-velo').hidden = !abierto;
+}
 
 // ---------- Eventos ----------
 porId('en-alg').innerHTML = ALGORITMOS_ENT.map(i => `<option value="${i}">${i + 1}. ${ALGORITMOS[i].nombre}</option>`).join('');
@@ -421,15 +445,44 @@ porId('en-grid').onclick = e => {
   if (b) { ent.sel = +b.dataset.id; dibujarEnt(); }
 };
 
-// ---------- Pestañas ----------
+// Pestañas del panel lateral y selector de código (Alice / Bob).
+document.querySelectorAll('.lado-pestanas [data-panel]').forEach(b => b.onclick = () => mostrarPanel(b.dataset.panel));
+document.querySelectorAll('.code-tabs button').forEach(b => b.onclick = () => { ent.procCodigo = +b.dataset.proc; dibujarCodigoEnt(); });
+
+// Ampliar: oculta los paneles para que el mapa ocupe toda la pantalla.
+porId('en-ampliar').onclick = () => {
+  const amplio = porId('vista-ent').classList.toggle('exclusivo');
+  porId('en-ampliar').textContent = amplio ? '⤡' : '⛶';
+  porId('en-ampliar').title = amplio ? 'Volver a mostrar los paneles' : 'Ocultar los paneles y ampliar el mapa';
+  requestAnimationFrame(ajustarEscala);
+};
+
+// En pantallas angostas los paneles se abren como hoja deslizante.
+porId('en-panel-btn').onclick = () => abrirPanelLateral(true);
+porId('en-panel-cerrar').onclick = () => abrirPanelLateral(false);
+porId('en-velo').onclick = () => abrirPanelLateral(false);
+
+// ---------- Pestañas de la aplicación ----------
 function mostrarVista(entrelazados) {
   porId('vista-sim').hidden = entrelazados;
   porId('vista-ent').hidden = !entrelazados;
   porId('t1').classList.toggle('on', !entrelazados);
   porId('t2').classList.toggle('on', entrelazados);
-  if (entrelazados) dibujarEnt();    // se redibuja visible para medir bien las flechas
+  porId('t1').setAttribute('aria-selected', !entrelazados);
+  porId('t2').setAttribute('aria-selected', entrelazados);
+  abrirPanelLateral(false);
+  try { history.replaceState(null, '', entrelazados ? '#ent' : '#sim'); } catch (e) { /* file:// viejo */ }
+  if (entrelazados) {
+    dibujarEnt();                        // se redibuja visible para medir bien las flechas
+    requestAnimationFrame(ajustarEscala);
+  } else {
+    programarAjuste();                   // vuelve a encajar el simulador
+  }
 }
+addEventListener('resize', ajustarEscala);
+addEventListener('load', ajustarEscala);
 aplicarConfig();
 porId('t1').onclick = () => mostrarVista(false);
 porId('t2').onclick = () => mostrarVista(true);
 reiniciarEnt();
+mostrarVista(location.hash === '#ent');   // se puede entrar directo a una vista con el hash

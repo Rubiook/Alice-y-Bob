@@ -3,68 +3,141 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
 <title>Alice y Bob y el patio · Exclusión mutua</title>
 <link rel="stylesheet" href="css/estilos.css">
 </head>
 <body>
-<main>
-<h1>Alice &amp; Bob y el patio</h1>
-<p class="mut">Exclusión mutua paso a paso · Sistemas Operativos</p>
-<p class="mut">Ejecutá una línea de Alice o de Bob por vez y buscá la secuencia que rompe el algoritmo.</p>
-<div class="pestanas"><button id="t1" class="on">Simulador</button><button id="t2">Entrelazados</button></div>
-<section id="vista-sim">
-<div id="nav"></div>
-<h2 id="tt"></h2><p id="ds" class="mut"></p>
-<div class="arriba">
-<div class="card"><div id="sc"></div><div id="vr"></div></div>
-<div class="lado card">
-<div id="st"></div>
-<div class="ctl">
-<button class="p a" id="ba">Avanza Alice</button>
-<button class="p b" id="bb">Avanza Bob</button>
-<button id="bz">Al azar</button>
-<button id="bu">Deshacer</button>
-<button id="br">Reiniciar</button>
+<div class="app">
+
+  <!-- ===== Cabecera: marca + cambio de vista + tema ===== -->
+  <header class="cabecera">
+    <div class="marca">
+      <span class="logo" aria-hidden="true">🐕</span>
+      <div class="marca-txt">
+        <h1>Alice <span class="amp">&amp;</span> Bob <span class="sub">y el patio</span></h1>
+        <p class="lema">Exclusión mutua paso a paso · Sistemas Operativos</p>
+      </div>
+    </div>
+    <nav class="pestanas" role="tablist" aria-label="Vistas de la aplicación">
+      <button id="t1" class="pestana on" role="tab" aria-selected="true" aria-controls="vista-sim">
+        <span class="pestana-ico" aria-hidden="true">🎬</span><span>Simulador</span>
+      </button>
+      <button id="t2" class="pestana" role="tab" aria-selected="false" aria-controls="vista-ent">
+        <span class="pestana-ico" aria-hidden="true">🕸️</span><span>Entrelazados</span>
+      </button>
+    </nav>
+    <button id="tema" class="tema" type="button" title="Cambiar tema claro / oscuro" aria-label="Cambiar tema claro / oscuro">🌙</button>
+  </header>
+
+  <main>
+
+    <!-- ===== Vista 1: Simulador ===== -->
+    <section id="vista-sim" class="vista" role="tabpanel" aria-labelledby="t1">
+      <div class="fit" id="fit-sim">
+        <div class="algs" id="nav" role="group" aria-label="Elegir algoritmo"></div>
+
+        <div class="sim-cuerpo">
+          <div class="card escena">
+            <div class="escena-svg" id="sc"></div>
+            <div id="st" role="status" aria-live="polite"></div>
+            <div id="vr" class="chips"></div>
+          </div>
+
+          <aside class="card panel">
+            <div class="panel-cab">
+              <h2 id="tt"></h2>
+              <p id="ds" class="mut"></p>
+            </div>
+            <div class="ctl">
+              <button class="p a" id="ba">Avanza Alice</button>
+              <button class="p b" id="bb">Avanza Bob</button>
+              <button id="bz">Al azar</button>
+              <button id="bu">Deshacer</button>
+              <button id="br">Reiniciar</button>
+            </div>
+            <details id="dt" class="veredicto">
+              <summary>Ver veredicto del algoritmo</summary>
+              <p id="vd"></p>
+            </details>
+            <p class="mut hist" id="lg"></p>
+            <p class="credito">Basado en el teórico del <a href="https://teoriasistemasoperativos.blogspot.com/p/3-sistemas-operativos-concurrencia-y.html" target="_blank" rel="noopener">Ing. Angel Caffa</a> · UTEC Maldonado</p>
+          </aside>
+        </div>
+
+        <div class="cols" id="cols"></div>
+      </div>
+    </section>
+
+    <!-- ===== Vista 2: Entrelazados ===== -->
+    <section id="vista-ent" class="vista" role="tabpanel" aria-labelledby="t2" hidden>
+      <div class="ajustes">
+        <label class="campo"><span>Algoritmo</span><select id="en-alg"></select></label>
+        <label class="interruptor"><input type="checkbox" id="en-bucle"><span class="pista"><i></i></span><span>con <code>while (true)</code></span></label>
+        <p class="ent-pista">Cada nodo es un estado · Alice avanza → · Bob avanza ↓</p>
+        <button id="en-panel-btn" class="panel-btn" type="button">📋 Paneles</button>
+      </div>
+
+      <div class="ent-cuerpo">
+        <div class="ent-principal">
+          <div class="en-lienzo" id="en-lienzo">
+            <div id="en-caja"><div id="en-grid"></div></div>
+            <button id="en-ampliar" class="ampliar" type="button" title="Ocultar los paneles y ampliar el mapa" aria-label="Ampliar el mapa">⛶</button>
+          </div>
+          <div id="en-barra" role="toolbar" aria-label="Controles del entrelazado">
+            <div class="en-sel">Nodo elegido: <b id="en-sel">—</b></div>
+            <div class="en-fila">
+              <button id="en-ba" class="avanza a"></button>
+              <button id="en-bb" class="avanza b"></button>
+              <button id="en-ambos" class="aux">Avanzar ambos</button>
+              <button id="en-todo" class="aux">Mostrar todo</button>
+              <button id="en-reset" class="aux">Reiniciar</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="ent-lado" id="ent-lado">
+          <div class="lado-pestanas" role="tablist" aria-label="Paneles del entrelazado">
+            <button class="on" data-panel="estado" role="tab" aria-selected="true">Estado</button>
+            <button data-panel="codigo" role="tab" aria-selected="false">Código</button>
+            <button data-panel="ayuda" role="tab" aria-selected="false">Ayuda</button>
+            <button id="en-panel-cerrar" class="panel-cerrar" type="button" aria-label="Cerrar paneles">✕</button>
+          </div>
+
+          <div class="lado-panel on" data-panel="estado">
+            <div id="en-info"></div>
+            <div id="en-concl"></div>
+          </div>
+
+          <div class="lado-panel" data-panel="codigo">
+            <div class="code-tabs">
+              <button class="on" data-proc="0">Alice</button>
+              <button data-proc="1">Bob</button>
+            </div>
+            <div class="cols" id="en-codigo"></div>
+          </div>
+
+          <div class="lado-panel" data-panel="ayuda">
+            <p class="ayuda-intro">Cada nodo es un estado posible. Los números están sobre las líneas de código: a la izquierda de una línea (o arriba, en Bob) todavía no se ejecutó; del otro lado ya se ejecutó. Alice avanza hacia la derecha y Bob hacia abajo. Cada nodo muestra A/B = a quién favorece el cartel y V/F = bandera levantada o no (primero Alice, después Bob).</p>
+            <div class="leyenda">
+              <h3>Cómo leer los colores</h3>
+              <ul>
+                <li><span class="ico">🔴</span><div><b>Nodo rojo</b><br>Los dos perros en el patio: se rompe la exclusión mutua.</div></li>
+                <li><span class="ico">🟠</span><div><b>Nodo naranja</b><br>Deadlock: nadie puede avanzar desde ese estado.</div></li>
+                <li><span class="raya"></span><div><b>Casillas rayadas</b><br>Zona de la sección crítica. Si el algoritmo funciona, ahí no cae ningún nodo.</div></li>
+                <li><span class="ico">🟥</span><div><b>Línea roja gruesa</b><br>La instrucción de la sección crítica (pasearPerro).</div></li>
+              </ul>
+            </div>
+            <p class="credito">Basado en el teórico del <a href="https://teoriasistemasoperativos.blogspot.com/p/3-sistemas-operativos-concurrencia-y.html" target="_blank" rel="noopener">Ing. Angel Caffa</a> · UTEC Maldonado.</p>
+          </div>
+        </aside>
+      </div>
+      <div id="en-velo" class="velo" hidden></div>
+    </section>
+
+  </main>
 </div>
-<details id="dt" class="card"><summary>Ver veredicto del algoritmo</summary><p id="vd"></p></details>
-</div>
-</div>
-<div class="cols" id="cols"></div>
-<p class="mut" id="lg"></p>
-</section>
-<section id="vista-ent" hidden>
-<h2>Entrelazados</h2>
-<p>Cada nodo es un estado posible. Los números están sobre las líneas de código: a la izquierda de una línea (o arriba, en Bob) todavía no se ejecutó; del otro lado ya se ejecutó. Alice avanza hacia la derecha y Bob hacia abajo. Cada nodo muestra A/B = a quién favorece el cartel y V/F = bandera levantada o no (primero Alice, después Bob). Tocá un nodo y usá los botones de la barra de abajo para avanzar como Alice (→), como Bob (↓) o los dos a la vez.</p>
-<div class="ajustes">
-<label class="campo"><span>Algoritmo</span><select id="en-alg"></select></label>
-<label class="interruptor"><input type="checkbox" id="en-bucle"><span class="pista"><i></i></span><span>con <code>while (true)</code></span></label>
-</div>
-<div class="card" id="en-info"></div>
-<div class="card en-scroll"><div id="en-caja"><div id="en-grid"></div></div></div>
-<div class="card" id="en-concl"></div>
-<div class="leyenda card">
-<h3>Cómo leer los colores</h3>
-<ul>
-<li><span class="ico">🔴</span><div><b>Nodo rojo</b><br>Los dos perros en el patio: se rompe la exclusión mutua.</div></li>
-<li><span class="ico">🟠</span><div><b>Nodo naranja</b><br>Deadlock: nadie puede avanzar desde ese estado.</div></li>
-<li><span class="raya"></span><div><b>Cuatro casillas rayadas</b><br>Zona de la sección crítica. Si el algoritmo funciona, ahí no cae ningún nodo.</div></li>
-<li><span class="ico">🟥</span><div><b>Línea roja gruesa</b><br>La instrucción de la sección crítica (pasearPerro).</div></li>
-</ul>
-</div>
-<div class="cols" id="en-codigo"></div>
-<div id="en-barra" role="toolbar" aria-label="Controles del entrelazado">
-<div class="en-sel">Nodo elegido: <b id="en-sel">—</b></div>
-<div class="en-fila">
-<button id="en-ba" class="avanza a"></button>
-<button id="en-bb" class="avanza b"></button>
-<button id="en-ambos" class="aux">Avanzar ambos</button>
-<button id="en-todo" class="aux">Mostrar todo</button>
-<button id="en-reset" class="aux">Reiniciar</button>
-</div>
-</div>
-</section>
-<footer>Basado en el teórico de Sistemas Operativos del Ing. Angel Caffa: <a href="https://teoriasistemasoperativos.blogspot.com/p/3-sistemas-operativos-concurrencia-y.html" target="_blank" rel="noopener">Concurrencia y sincronización de procesos</a>. Herramienta didáctica para estudiantes de Sistemas Operativos, Tecnólogo en Informática, UTEC Maldonado.</footer>
-</main>
+
 <script src="js/algoritmos.js"></script>
 <script src="js/app.js"></script>
 <script src="js/entrelazados.js"></script>

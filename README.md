@@ -2,6 +2,12 @@
 
 Herramienta interactiva para aprender exclusión mutua en Sistemas Operativos: Cartel, Banderas, espera aleatoria, Dekker y Peterson. Hecha con HTML, CSS y JavaScript puros, sin dependencias.
 
+## Ver online
+
+**https://rubiook.github.io/Alice-y-Bob/**
+
+Se publica automáticamente con GitHub Pages (workflow `.github/workflows/pages.yml`) cada vez que se sube un cambio a `main`.
+
 ## Qué hace
 
 - Muestra a Alice, Bob, sus perros, las banderas y el cartel en el patio compartido (el RSR).

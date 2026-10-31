@@ -1,0 +1,5 @@
+# Basura de sistema y del editor
+.vscode/
+Thumbs.db
+desktop.ini
+*.log

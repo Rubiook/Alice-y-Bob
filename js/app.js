@@ -5,13 +5,54 @@
 
 const porId = id => document.getElementById(id);
 
-// Si es celular (pantalla táctil o angosta), la página agrega la clase "movil".
-document.documentElement.classList.toggle('movil',
-  matchMedia('(pointer:coarse)').matches || innerWidth < 640);
-
 let algoritmoActual = 0;   // índice dentro de ALGORITMOS
 let estado;                // estado de la ejecución (ver algoritmos.js)
 let deshacer = [];         // copias de estados anteriores, para el botón "Deshacer"
+
+// Icono y etiqueta corta de cada algoritmo, para las tarjetas de opciones.
+const ICONOS_ALG = ['🎫', '👀', '🚩', '🎲', '🧠', '🧩'];
+const etiquetaAlg = a => a.usaCartel && a.usaBanderas ? 'cartel + banderas'
+  : a.usaCartel ? 'cartel' : 'banderas';
+
+// ---------- AJUSTE AUTOMÁTICO DEL SIMULADOR ----------
+// Mide el contenido real y lo escala para que entre completo en la ventana (sin scroll).
+let turnoAjuste = 0;
+function ajustarFitSim() {
+  const vista = porId('vista-sim'), fit = porId('fit-sim');
+  if (!vista || !fit || vista.hidden) return;
+  fit.style.transform = 'none';
+  fit.style.marginBottom = '0px';
+  const altoDisponible = vista.clientHeight;
+  const altoNatural = fit.offsetHeight;          // alto real, medido sin escala
+  if (!altoNatural || !altoDisponible) return;
+  const escala = Math.min(1, altoDisponible / altoNatural);
+  if (escala < 0.999) {
+    fit.style.transform = `scale(${escala})`;
+    fit.style.marginBottom = `${-(altoNatural - altoNatural * escala)}px`;
+  }
+}
+function programarAjuste() {
+  cancelAnimationFrame(turnoAjuste);
+  turnoAjuste = requestAnimationFrame(ajustarFitSim);
+}
+
+// ---------- TEMA CLARO / OSCURO ----------
+const temaEsOscuro = () => {
+  const elegido = document.documentElement.dataset.theme;
+  return elegido ? elegido === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+};
+function pintarBotonTema() { porId('tema').textContent = temaEsOscuro() ? '☀️' : '🌙'; }
+try {
+  const guardado = localStorage.getItem('tema');
+  if (guardado) document.documentElement.dataset.theme = guardado;
+} catch (e) { /* sin almacenamiento: se usa el tema del sistema */ }
+porId('tema').onclick = () => {
+  const nuevo = temaEsOscuro() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = nuevo;
+  try { localStorage.setItem('tema', nuevo); } catch (e) { /* nada */ }
+  pintarBotonTema();
+};
+pintarBotonTema();
 
 const estadoInicial = () => ({
   linea: [0, 0], bandera: [false, false], cartel: 0, espera: [0, 0],
@@ -218,7 +259,10 @@ function dibujar() {
   const esperando = [estaEsperando(0), estaEsperando(1)];
   const [clase, mensaje] = calcularMensaje();
 
-  [...porId('nav').children].forEach((b, i) => b.classList.toggle('on', i === algoritmoActual));
+  [...porId('nav').children].forEach((b, i) => {
+    b.classList.toggle('on', i === algoritmoActual);
+    b.setAttribute('aria-pressed', i === algoritmoActual);
+  });
   porId('tt').textContent = (algoritmoActual + 1) + '. ' + a.nombre;
   porId('ds').textContent = a.descripcion;
   porId('vd').textContent = a.veredicto;
@@ -238,6 +282,7 @@ function dibujar() {
   const choque = !!hayChoque(estado);
   ['ba', 'bb', 'bz'].forEach(id => porId(id).disabled = choque);   // Avanza Alice / Bob / Al azar
   porId('bu').disabled = deshacer.length === 0;
+  programarAjuste();   // el alto del contenido cambia: se vuelve a encajar en pantalla
 }
 
 // ---------- BOTONES ----------
@@ -250,12 +295,22 @@ function elegirAlgoritmo(i) {
 }
 
 porId('sc').innerHTML = crearEscena();   // la escena se crea una sola vez
-porId('nav').innerHTML = ALGORITMOS.map((a, i) => `<button>${i + 1} ${a.nombreCorto}</button>`).join('');
+porId('nav').innerHTML = ALGORITMOS.map((a, i) => `<button class="alg" type="button" aria-pressed="false">
+    <span class="alg-ico" aria-hidden="true">${ICONOS_ALG[i] || '•'}</span>
+    <span class="alg-txt"><b>${a.nombreCorto}</b><small>${etiquetaAlg(a)}</small></span>
+  </button>`).join('');
 [...porId('nav').children].forEach((boton, i) => boton.onclick = () => elegirAlgoritmo(i));
 porId('ba').onclick = () => avanzar(0);
 porId('bb').onclick = () => avanzar(1);
 porId('bz').onclick = () => avanzar(Math.random() < 0.5 ? 0 : 1);
 porId('bu').onclick = () => { if (deshacer.length) { estado = deshacer.pop(); dibujar(); } };
 porId('br').onclick = () => elegirAlgoritmo(algoritmoActual);
+
+// Reencajar el simulador cuando cambia el tamaño de la ventana o se abre el veredicto.
+addEventListener('resize', programarAjuste);
+if (window.visualViewport) visualViewport.addEventListener('resize', programarAjuste);
+porId('dt').addEventListener('toggle', programarAjuste);
+addEventListener('load', programarAjuste);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(programarAjuste);
 
 elegirAlgoritmo(0);
